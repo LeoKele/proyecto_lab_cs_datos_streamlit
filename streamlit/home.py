@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -172,12 +173,19 @@ df_resultados
 st.markdown("### Evaluación de los modelos iniciales")
 st.code(code_evaluar_modelos, language='python')
 
-df_mod = limpiar_datos(data)
-df_inicial = codificar_datos_inicial(df_mod)
 
-# Dividir datos
-X_train, X_test, y_train, y_test = dividir_datos(df_inicial)
-df_resultados = evaluar_modelos_iniciales(X_train, X_test, y_train, y_test)
+
+# Cargar resultados de modelos iniciales
+
+@st.cache_data
+def cargar_resultados():
+    ruta_base = os.path.dirname(__file__)  # Carpeta actual del archivo .py
+    ruta_archivo = os.path.join(ruta_base, "modelos_entrenados", "resultados_iniciales.pkl")
+    print(f"Cargando resultados desde: {ruta_archivo}")
+    with open(ruta_archivo, "rb") as f:
+        return pickle.load(f)
+
+df_resultados = cargar_resultados()
 st.dataframe(df_resultados)
 
 st.subheader("Fase 2 - Comparación con estandarización")
@@ -249,14 +257,17 @@ st.markdown("### Evaluación de los modelos iniciales estandarizados")
 st.code(code_evaluar_modelos_estandarizados, language='python')
 
 
-df_mod = limpiar_datos(data)
-df_inicial = codificar_datos_inicial(df_mod)
+#Cargar resultados de modelos estandarizados
+@st.cache_data
+def cargar_resultados():
+    ruta_base = os.path.dirname(__file__)  # Carpeta actual del archivo .py
+    ruta_archivo = os.path.join(ruta_base, "utils","modelos_entrenados", "resultados_iniciales_estandarizados.pkl")
+    print(f"Cargando resultados desde: {ruta_archivo}")
+    with open(ruta_archivo, "rb") as f:
+        return pickle.load(f)
 
-# Dividir datos
-X_train_scaled = X_train.copy()
-X_test_scaled = X_test.copy()
-X_train_scaled, X_test_scaled = estandarizar_datos(X_train_scaled, X_test_scaled)
-df_resultados_std = evaluar_modelos_iniciales_estandarizados(X_train_scaled, X_test_scaled, y_train, y_test)
+
+df_resultados_std = cargar_resultados()
 st.dataframe(df_resultados_std)
 
 
