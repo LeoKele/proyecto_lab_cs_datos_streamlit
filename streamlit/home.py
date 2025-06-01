@@ -1,8 +1,9 @@
 import streamlit as st
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from utils.preparacion_datos import limpiar_datos, codificar_datos_inicial, dividir_datos, estandarizar_datos, transformacion_datos
+from utils.preparacion_datos import cargar_datos,limpiar_datos, codificar_datos_inicial, dividir_datos, estandarizar_datos, transformacion_datos
 from utils.comparacion_modelos import comparar_resultados_interactivo, comparar_metricas_modelos_especificos
 from utils.modelos import evaluar_modelos_iniciales, evaluar_modelos_iniciales_estandarizados
 
@@ -19,12 +20,6 @@ st.markdown("""
 - Kelechian Leonardo
 """)
 
-# Cargar datos (esto podrías moverlo a preparacion_datos.py)
-@st.cache_data
-def cargar_datos():
-    ruta_archivo = "data\Grupo 3 - Abandono de Clientes.csv"  # Ajustar ruta
-    data = pd.read_csv(ruta_archivo, sep=',', encoding='utf-8')
-    return data
 
 # Cargar datos una vez
 data = cargar_datos()

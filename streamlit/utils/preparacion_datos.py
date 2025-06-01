@@ -1,6 +1,16 @@
 import pandas as pd
+import streamlit as st
+import os
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+
+@st.cache_data
+def cargar_datos():
+    # print("Directorio actual:", os.getcwd())
+    ruta_archivo = os.path.join(os.getcwd(), 'data', 'Grupo 3 - Abandono de Clientes.csv')
+    data = pd.read_csv(ruta_archivo, sep=',', encoding='utf-8')
+    return data
+
 
 
 #Vamos a utilizar esta funcion para limpiar los datos
