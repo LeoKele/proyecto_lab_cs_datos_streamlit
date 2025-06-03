@@ -1,6 +1,7 @@
 import plotly.express as px
 import streamlit as st
 import pandas as pd
+from utils.colores import PALETA
 
 def comparar_resultados_interactivo(df_resultados, df_resultados_std):
     df_resultados = df_resultados.copy()
@@ -22,7 +23,8 @@ def comparar_resultados_interactivo(df_resultados, df_resultados_std):
         barmode='group',
         title='Comparación de modelos (Balanced Accuracy)',
         range_x=[0.5, 1.0],
-        category_orders={'Modelo': modelos_ordenados}
+        category_orders={'Modelo': modelos_ordenados},
+        color_discrete_sequence=PALETA
     )
     st.plotly_chart(fig, use_container_width=True)
     return df_todos
@@ -58,7 +60,9 @@ def comparar_metricas_modelos_especificos(df_todos, modelos_comparar=None):
         facet_col='Datos',
         orientation='h',
         title='Comparación de F1 Score, PR AUC, Recall y Precision para modelos seleccionados',
-        height=500
+        height=500,
+        color_discrete_sequence=PALETA
+
     )
     fig.update_layout(xaxis_title='Valor de la Métrica', yaxis_title='Modelo')
     st.plotly_chart(fig, use_container_width=True)
