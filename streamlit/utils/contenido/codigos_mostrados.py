@@ -46,13 +46,20 @@ print(f"Cantidad de filas con valor nulo en 'Total Charges': {df_mod['TotalCharg
 """.strip()
 
 code_limpieza2 = """
-# Imputación con la mediana
-mediana_TotalCharges = df_mod['TotalCharges'].median()
-df_mod['TotalCharges'] = df_mod['TotalCharges'].fillna(mediana_TotalCharges)
+# Eliminamos las filas con valores nulos en TotalCharges
+df_mod = df_mod.dropna(subset=['TotalCharges'])
+print(f"Cantidad de filas después de eliminar nulos: {len(df_mod)}")
+print(f"Filas eliminadas: {len(data) - len(df_mod)}")
+""".strip()
 
-# Vemos como ahora no hay falores faltantes
-print(f"Cantidad de filas con valor nulo en 'Total Charges': {df_mod['TotalCharges'].isnull().sum()}");
-"""
+code_limpieza3 = """
+df_mod.PaymentMethod.unique()
+""".strip()
+code_limpieza4 = """
+df_mod['PaymentMethod'] = df_mod['PaymentMethod'].str.replace(' (automatic)', '', regex=False)
+df_mod.PaymentMethod.unique()
+""".strip()
+
 
 
 code_evaluar_modelos = """
@@ -208,4 +215,93 @@ code_evaluacion_modelos_estandarizados = """
 # ==============================================================================
 df_resultados_std = evaluar_modelos_estandarizados(X_train_scaled, y_train, X_test_scaled, y_test)
 df_resultados_std
+""".strip()
+
+
+
+#! ================================================
+#! ================================================
+#! ================================================
+#? Preparacion de los datos para el modelo
+code_manejo_redun_1 = """
+df_mod_1 = df_mod.copy()
+df_mod_1['HasMultipleLines'] = ((df_mod_1['PhoneService'] == 1) & (df_mod_1['MultipleLines'] == 'Yes')).astype(int)
+df_mod_1.drop(columns='MultipleLines', inplace=True)
+""".strip()
+
+code_manejo_redun_2 = """
+df_mod_2 = df_mod_1.copy()
+# Lista de columnas relacionadas con servicios que dependen de tener Internet
+internet_services = [
+    'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+    'TechSupport', 'StreamingTV', 'StreamingMovies'
+]
+
+# Creamos nuevas variables binarias
+for col in internet_services:
+    new_col = 'Has' + col  # Ej: 'HasOnlineSecurity'
+    df_mod_2[new_col] = ((df_mod_2['InternetService'] != 'No') & (df_mod_2[col] == 'Yes')).astype(int)
+
+# Eliminamos columnas originales
+df_mod_2.drop(columns=internet_services, inplace=True)
+""".strip()
+
+
+code_transformacion_1 = """
+# Transformamos variables categóricas de 3 o más opciones con el método dummy coding.
+df_mod_3 = df_mod_2.copy()
+
+# Lista de columnas categóricas a codificar
+categorical_cols = ['InternetService', 'Contract', 'PaymentMethod']
+
+# Aplicamos One-Hot Encoding
+df_mod_3 = pd.get_dummies(df_mod_3, columns=categorical_cols, drop_first=True)
+""".strip()
+
+code_transformacion_2 = """
+# Todas las nuevas columnas creadas por el dummy coding son booleanas, las transformamos a numéricas
+df_mod_4 = df_mod_3.copy()
+bool_cols = df_mod_4.select_dtypes(include='bool').columns
+df_mod_4[bool_cols] = df_mod_4[bool_cols].astype(int)
+""".strip()
+
+code_transformacion_3 = """
+# Reemplazo específico para 'gender'
+df_mod_5 = df_mod_4.copy()
+df_mod_5['gender'] = df_mod_5['gender'].replace({'Male': 1, 'Female': 0})
+
+# Otras variables categóricas binarias (Yes/No)
+binary_cols = ['Partner', 'Dependents', 'PhoneService', 'PaperlessBilling','Churn']
+df_mod_5[binary_cols] = df_mod_5[binary_cols].replace({'Yes': 1, 'No': 0})
+""".strip()
+
+code_df_final = """
+# Eliminamos costumerID
+df_final = df_mod_5.copy()
+df_final.drop(columns='customerID', inplace=True)
+""".strip()
+
+code_split = """
+# División de los datos en train y test
+# ==============================================================================
+X_train, X_test, y_train, y_test = train_test_split(
+                                        df_final.drop(columns = 'Churn'),
+                                        df_final['Churn'],
+                                        random_state = 22
+                                    )
+""".strip()
+
+code_estandarizacion = """
+# Variables a escalar
+cols_to_scale = ['tenure', 'MonthlyCharges', 'TotalCharges']
+
+# Inicializamos el escalador
+scaler = StandardScaler()
+
+# Ajustamos el escalador solo con datos de entrenamiento
+X_train_scaled = X_train.copy()
+X_test_scaled = X_test.copy()
+
+X_train_scaled[cols_to_scale] = scaler.fit_transform(X_train[cols_to_scale])
+X_test_scaled[cols_to_scale] = scaler.transform(X_test[cols_to_scale])
 """.strip()
