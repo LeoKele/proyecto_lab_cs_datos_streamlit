@@ -12,13 +12,13 @@ from utils.modulos.eda import *
 
 from utils.contenido.codigos_mostrados import *
 from utils.contenido.textos_mostrados import *
-from utils.colores import PALETA
+from utils.colores import PALETA, colores_barras_binarias
 
 # Configuración inicial de la página
 st.set_page_config(page_title="Análisis de Abandono de Clientes", layout="centered")
 
 # Título y presentación
-st.markdown("<h1 style='text-align: center;color: #66BB6A;'>🎓 Trabajo Integrador Final - Abandono de Clientes</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>🎓 Trabajo Integrador Final - Abandono de Clientes</h1>", unsafe_allow_html=True)
 st.markdown("""
 👥 Integrantes:
 - Fernando Burgos
