@@ -15,3 +15,5 @@ Reconocemos que reducir el churn es crítico: captar un nuevo cliente [puede cos
 Un modelo predictivo de churn permite identificar a aquellos clientes con alta probabilidad de abandono y aplicarles de manera selectiva acciones de retención (ofertas personalizadas, upgrades de servicio, atención proactiva), cuya inversión es considerablemente más baja que la necesaria para reemplazarlos por nuevos usuarios. Esto no solo incrementa la eficiencia del presupuesto de marketing, sino que fortalece las métricas de satisfacción y de lealtad, alimentando un círculo virtuoso de crecimiento sostenible.
 
 """.strip()
+
+
