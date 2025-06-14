@@ -1,4 +1,8 @@
 import streamlit as st
+
+# Configuración inicial de la página
+st.set_page_config(page_title="Análisis de Abandono de Clientes", layout="centered")
+
 import os
 import pickle
 import pandas as pd
@@ -6,16 +10,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
-from utils.modulos.preparacion_datos import cargar_datos,limpiar_datos, codificar_datos_inicial, dividir_datos, estandarizar_datos, transformacion_datos
-from utils.modulos.comparacion_modelos import comparar_resultados_interactivo, comparar_metricas_modelos_especificos, mostrar_comparacion_nuevas_variables, mostrar_comparacion_optuna_vs_gridsearch
+from utils.modulos.preparacion_datos import *
+from utils.modulos.comparacion_modelos import *
 from utils.modulos.eda import *
+from utils.modulos.evaluacion_modelo import *
 
 from utils.contenido.codigos_mostrados import *
 from utils.contenido.textos_mostrados import *
 from utils.colores import PALETA, colores_barras_binarias
 
-# Configuración inicial de la página
-st.set_page_config(page_title="Análisis de Abandono de Clientes", layout="centered")
+
 
 # Título y presentación
 st.markdown("<h1 style='text-align: center;'>🎓 Trabajo Integrador Final - Abandono de Clientes</h1>", unsafe_allow_html=True)
@@ -441,10 +445,106 @@ st.markdown("---")
 st.header("🧠 Entrenamiento del modelo")
 st.markdown("Ya estamos en condiciones de optimizar el modelo elegido con el propósito de mejorar aún más esas mérticas iniciales obtenidas.")
 
+st.markdown("Hacemos una función donde vamos a guardar los mejores hiperparámetros de cada entrenamiento para luego comparar todo junto.")
+with st.expander("Ver código función para el DataFrame de resultados", expanded=True):
+    st.code(code_resultados_busquedas, language='python')
+    st.write("Creamos el DataFrame donde guardaremos estos resultados:")
+    st.code("df_resultados_optimizacion = pd.DataFrame()",language='python')
 
-mostrar_comparacion_optuna_vs_gridsearch()
+st.subheader("GridSearchCV() - Hiperparámetros básicos")
+st.markdown("Se realiza una búsqueda de hiperparámetros utilizando un grid básico con valores comúnmente utilizados. Este grid permite obtener una primera aproximación al rendimiento del modelo sin requerir mucho tiempo de cómputo. Sirve como punto de partida para identificar si existe una mejora del modelo inicial.")
+with st.expander("Ver código función para el GridSearchCV Básico", expanded=True):
+    st.code(code_gridSearchBasico,language='python')
+    st.write("Agregamos los resultados al DF para luego comparar:")
+    st.code("df_resultados_optimizacion = agregar_resultado_busqueda(df_resultados_optimizacion,grid_basico,'GridSearch - Basico')",language='python')
+
+st.subheader("GridSearchCV() - Hiperparámetros Fino")
+st.markdown("""
+En base a los resultados obtenidos con el grid básico, se define un grid más fino con valores logarítmicamente espaciados para los hiperparámetros `C` y `gamma`. Esta estrategia permite explorar con mayor detalle combinaciones en una región más amplia, incrementando la probabilidad de encontrar un mejor conjunto de hiperparámetros.  
+            """)
+with st.expander("Ver código función para el GridSearchCV Fino", expanded=True):
+    st.code(code_gridSearchFino,language='python')
+    st.write("Agregamos los resultados al DF para luego comparar:")
+    st.code("df_resultados_optimizacion = agregar_resultado_busqueda(df_resultados_optimizacion,grid_fino,'GridSearch - Fino')",language='python')
 
 
+st.subheader("GridSearchCV() - Hiperparámetros Fino V2")
+st.markdown("""
+A partir de los mejores valores encontrados en la búsqueda anterior, se realiza un ajuste más localizado, centrado en un rango reducido alrededor del mejor `C` y `gamma`. Este enfoque permite afinar aún más el modelo, evaluando con mayor precisión pequeñas variaciones que podrían mejorar ligeramente el rendimiento. Básicamente, hacemos un "zoom" entorno al mejor valor encontrado por el entrenamiento anterior.
+""")
+with st.expander("Ver código función para el GridSearchCV Fino", expanded=True):
+    st.code(code_gridSearchFinoV2,language='python')
+    st.write("Agregamos los resultados al DF para luego comparar:")
+    st.code("df_resultados_optimizacion = agregar_resultado_busqueda(df_resultados_optimizacion,grid_fino_v2,'GridSearch - Fino V2')",language='python')
 
 
-st.markdown()
+st.subheader("RandomizedSearchCV()")
+st.markdown("""
+Se aplica una búsqueda aleatoria con distribuciones continuas. Esta técnica permite cubrir un espacio de búsqueda más amplio, con menor costo computacional que un grid exhaustivo. Si bien no garantiza encontrar el mejor valor absoluto, puede descubrir combinaciones efectivas que un grid regular no contempla.
+""")
+with st.expander("Ver código función para el RandomizedSearchCV()", expanded=True):
+    st.code(code_randomizedSearch,language='python')
+    st.write("Agregamos los resultados al DF para luego comparar:")
+    st.code("df_resultados_optimizacion = agregar_resultado_busqueda(df_resultados_optimizacion,random_search,'Random Search')",language='python')
+
+st.subheader("Comparación de las métricas obtenidas en cada entrenamiento")
+st.markdown("[yo pondria algo aca]")
+
+#Cargar resultados de modelos optimizados
+@st.cache_data
+def cargar_resultados_optimizacion():
+    ruta_base = os.path.dirname(__file__)  # Carpeta actual del archivo .py
+    ruta_archivo = os.path.join(ruta_base, "utils","modelos_entrenados", "df_optimizacion.pkl")
+    print(f"Cargando resultados desde: {ruta_archivo}")
+    with open(ruta_archivo, "rb") as f:
+        return pickle.load(f)
+
+df_optimizacion = cargar_resultados_optimizacion()
+st.dataframe(df_resultados_std)
+comparacion_modelos_optimizados(df_optimizacion)
+
+st.markdown("[Habria que terminar de cerrar la idea de que el modelo seleccionado fue el creado con la busqueda mas fina de hiperparametros]")
+
+df_final_app = data.copy()
+modelo_comparacion = cargar_modelo_optimizado()
+mostrar_comparacion_optuna_vs_gridsearch(modelo_comparacion,df_final_app)
+
+#! ==============================================================
+st.markdown("---")
+#! ==============================================================
+
+
+st.header("🔮 Predicción y Evaluación del modelo")
+st.markdown("""
+En esta sección vamos a mostrar el resultado final luego de entrenar nuestro modelo optimizado de `SVM` analizando todas sus métricas resultantes y comparando si hubo una mejora, o no, respecto al primer entrenamiento hecho.        
+            """)
+
+st.subheader("Predicción y evaluación del modelo")
+
+modelo_final = cargar_modelo_optimizado().best_estimator_
+
+mostrar_matriz_confusion(df_final_app, modelo_final)
+
+
+st.subheader("Importancia de predictores")
+
+#Cargar resultados de la importancia de predictores
+@st.cache_data
+def cargar_resultados_importancia():
+    ruta_base = os.path.dirname(__file__)  # Carpeta actual del archivo .py
+    ruta_archivo = os.path.join(ruta_base, "utils","modelos_entrenados", "importancia_permutacion.pkl")
+    print(f"Cargando resultados desde: {ruta_archivo}")
+    with open(ruta_archivo, "rb") as f:
+        return pickle.load(f)
+st.write("Importancia de características por permutación:")
+
+df_importancia = cargar_resultados_importancia()
+st.dataframe(df_importancia)
+
+graficar_importancia_plotly(df_importancia)
+
+
+#! ==============================================================
+st.markdown("---")
+#! ==============================================================
+st.header("✅ Conclusión Final")

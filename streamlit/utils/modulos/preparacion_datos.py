@@ -20,9 +20,10 @@ def limpiar_datos(data):
 
 # Convertir TotalCharges a tipo numérico (float) y manejar errores
     df_mod['TotalCharges'] = pd.to_numeric(df_mod['TotalCharges'], errors='coerce')
-    # Imputación con la mediana
-    mediana_TotalCharges = df_mod['TotalCharges'].median()
-    df_mod['TotalCharges'] = df_mod['TotalCharges'].fillna(mediana_TotalCharges) 
+    # Eliminamos las filas con valores nulos en TotalCharges
+    df_mod = df_mod.dropna(subset=['TotalCharges'])
+    print(f"Cantidad de filas después de eliminar nulos: {len(df_mod)}")
+    print(f"Filas eliminadas: {len(data) - len(df_mod)}")
 
     return df_mod
 
@@ -60,11 +61,40 @@ def codificar_datos_inicial(data):
     # --- Fin de la codificación rápida ---
     return df_inicial
 
+def manejar_columnas_redundantes(df):
+    df_mod = df.copy()
+    
+    # HasMultipleLines
+    if 'MultipleLines' in df_mod.columns:
+        df_mod['HasMultipleLines'] = ((df_mod['PhoneService'] == 1) & (df_mod['MultipleLines'] == 'Yes')).astype(int)
+        df_mod.drop(columns='MultipleLines', inplace=True, errors='ignore')
+
+    # Columnas relacionadas con InternetService
+    internet_services = [
+        'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+        'TechSupport', 'StreamingTV', 'StreamingMovies'
+    ]
+    
+    for col in internet_services:
+        if col in df_mod.columns:
+            new_col = f'Has{col}'
+            df_mod[new_col] = ((df_mod['InternetService'] != 'No') & (df_mod[col] == 'Yes')).astype(int)
+
+    df_mod.drop(columns=internet_services, inplace=True, errors='ignore')
+    
+    return df_mod
+
 
 
 def transformacion_datos(data):
     # Copia del DataFrame original
     df_mod = data.copy()
+    
+    # Unificar etiquetas de PaymentMethod para coincidir con el modelo entrenado
+    df_mod['PaymentMethod'] = df_mod['PaymentMethod'].replace({
+        'Credit card (automatic)': 'Credit card',
+        'Bank transfer (automatic)': 'Bank transfer'
+    })
     
     # Convertir TotalCharges a numérico y manejar nulos
     df_mod['TotalCharges'] = pd.to_numeric(df_mod['TotalCharges'], errors='coerce')
@@ -73,18 +103,19 @@ def transformacion_datos(data):
     
     # Eliminar customerID
     df_mod.drop(columns='customerID', inplace=True)
-    
-    # Codificación de variables
+
+    # Codificación binaria básica
     binary_cols = ['gender', 'Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']
     for col in binary_cols:
         df_mod[col] = df_mod[col].replace({'Yes': 1, 'No': 0, 'Male': 1, 'Female': 0})
     
+    # Aplicar manejo de columnas redundantes ANTES del get_dummies
+    df_mod = manejar_columnas_redundantes(df_mod)
+
     # One-Hot Encoding
-    categorical_cols = ['MultipleLines', 'InternetService', 'OnlineSecurity', 'OnlineBackup',
-                        'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies',
-                        'Contract', 'PaymentMethod']
+    categorical_cols = ['InternetService', 'Contract', 'PaymentMethod']
     df_mod = pd.get_dummies(df_mod, columns=categorical_cols, drop_first=True)
-    
+
     # Convertir Churn a binario
     df_mod['Churn'] = df_mod['Churn'].replace({'Yes': 1, 'No': 0})
     

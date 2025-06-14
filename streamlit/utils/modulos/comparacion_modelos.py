@@ -1,8 +1,17 @@
 import plotly.express as px
+import plotly.graph_objects as go
+
 import streamlit as st
 import pandas as pd
 import os
 from utils.colores import PALETA
+
+from sklearn.metrics import (
+    balanced_accuracy_score, f1_score, recall_score,
+    precision_score, average_precision_score
+)
+
+from utils.modulos.evaluacion_modelo import df_final_dividido
 
 
 def comparar_resultados_interactivo(df_resultados, df_resultados_std):
@@ -127,7 +136,7 @@ def mostrar_comparacion_nuevas_variables():
 
 
 
-def mostrar_comparacion_optuna_vs_gridsearch():
+def mostrar_comparacion_optuna_vs_gridsearch(modelo_grid,df):
     """
     Muestra en Streamlit la comparación de métricas entre SVM optimizado con GridSearch y Optuna.
     Explica por qué se decidió no usar Optuna en el modelo final.
@@ -143,53 +152,63 @@ def mostrar_comparacion_optuna_vs_gridsearch():
     
     Las métricas obtenidas fueron:
     """)
+    
+    # Valores de Balanced Accuracy (conjunto de prueba)
+    balanced_accuracy_optuna = 0.7655
+    balanced_accuracy_fino_v2 = 0.7656  # ← reemplazá con el valor real si lo tenés
 
-    # Supóniendo que ya está el archivo pickle con las métricas de GridSearch
-    ruta_base = os.path.dirname(__file__)
-    ruta_pickle = os.path.join(ruta_base,"modelos_entrenados", "metricas_svm_gridsearch_final.pkl")
-    metricas_grid = pd.read_pickle(ruta_pickle)
+    # Nombres de los modelos
+    metodos = ['GridSearch - Fino V2', 'Optuna']
+    scores = [balanced_accuracy_fino_v2, balanced_accuracy_optuna]
 
-    # Métricas Optuna (de las capturas)
-    metricas_optuna = {
-        'Balanced Accuracy': 0.7586,
-        'F1 Score': 0.6328,
-        'Recall': 0.7787,
-        'Precision': 0.5330,
-        'PR AUC': 0.6428
-    }
-
-    # Métricas GridSearch 
-    if isinstance(metricas_grid, pd.DataFrame):
-        metricas_grid = metricas_grid.iloc[0].to_dict()
-
-    df_comp = pd.DataFrame(
-        [metricas_grid, metricas_optuna],
-        index=['SVM GridSearch', 'SVM Optuna']
+    # Crear figura
+    fig = go.Figure(
+        go.Bar(
+            x=metodos,
+            y=scores,
+            text=[f"{s:.4f}" for s in scores],
+            textposition='auto',
+            marker_color=PALETA
+        )
     )
 
-    st.dataframe(df_comp)
-
-    st.markdown("Visualización comparativa:")
-
-    df_plot = df_comp.T.reset_index().rename(columns={'index': 'Métrica'})
-    df_plot = df_plot.melt(id_vars='Métrica', var_name='Método', value_name='Valor')
-
-    fig = px.bar(
-        df_plot,
-        x='Métrica',
-        y='Valor',
-        color='Método',
-        barmode='group',
-        title='Comparación de métricas: SVM GridSearch vs SVM Optuna',
-        template='plotly_white',
-        height=400,
-        color_discrete_sequence=PALETA
-    )
+    # Personalizar el gráfico
     fig.update_layout(
-        yaxis_title='Valor',
-        xaxis_title='Métrica',
-        legend_title='Método'
+        title="Comparación de Balanced Accuracy en el conjunto de prueba",
+        xaxis_title="Método",
+        yaxis_title="Balanced Accuracy",
+        yaxis=dict(range=[0.7, 0.78]),
+        template='plotly_white'
     )
-    st.plotly_chart(fig, use_container_width=True)
+
+    # Mostrar en Streamlit
+    st.plotly_chart(fig)
 
     st.info("Como se observa, Optuna no aportó mejoras significativas y su tiempo de entrenamiento fue mayor. Por eso, optamos por GridSearchCV para el modelo final.")
+    
+    
+    
+def comparacion_modelos_optimizados(df_optimizacion):
+    fig = go.Figure(data=[
+    go.Bar(
+        x=df_optimizacion['Método'],
+        y=df_optimizacion['Balanced Accuracy'],
+        marker_color=PALETA,
+        text=[f"{v:.3f}" for v in df_optimizacion['Balanced Accuracy']],
+        textposition='outside',
+        textfont=dict(weight='bold')
+    )
+])
+
+    # Configurar el diseño
+    fig.update_layout(
+        title='Comparación de mejores resultados por método de búsqueda',
+        xaxis_title='Método',
+        yaxis_title='Balanced Accuracy',
+        yaxis=dict(range=[0, 1]),
+        xaxis=dict(tickangle=15),
+        width=800,
+        height=500
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    

@@ -305,3 +305,124 @@ X_test_scaled = X_test.copy()
 X_train_scaled[cols_to_scale] = scaler.fit_transform(X_train[cols_to_scale])
 X_test_scaled[cols_to_scale] = scaler.transform(X_test[cols_to_scale])
 """.strip()
+
+
+code_resultados_busquedas = """
+def agregar_resultado_busqueda(df_resultados, search_obj, nombre_metodo):
+    nueva_fila = {
+        'Método': nombre_metodo,
+        'Mejores Hiperparámetros': search_obj.best_params_,
+        'Mejor Score': search_obj.best_score_,
+        'Scoring': search_obj.scoring
+    }
+    return pd.concat([df_resultados, pd.DataFrame([nueva_fila])], ignore_index=True)
+""".strip()
+
+
+code_gridSearchBasico = """
+# Grid de hiperparámetros evaluados
+# ==============================================================================
+param_grid_basico = {
+    'C': [0.1, 1, 10, 100, 1000],
+    'gamma': [0.0001, 0.001, 0.01, 0.1, 1],
+    'class_weight': ['balanced']
+}
+
+# Búsqueda por grid search con validación cruzada
+# ==============================================================================
+grid_basico = GridSearchCV(
+        estimator  = SVC(kernel='rbf',random_state=22),
+        param_grid = param_grid_basico,
+        scoring    = 'balanced_accuracy',
+        n_jobs     = multiprocessing.cpu_count() - 1,
+        cv         = StratifiedKFold(n_splits=10, shuffle=True, random_state=22), #Mantiene la proporción de clases en cada fold
+        refit      = True,
+        verbose    = 0,
+        return_train_score = True
+       )
+
+grid_basico.fit(X = X_train_scaled, y = y_train)
+""".strip()
+
+code_gridSearchFino = """
+# Grid de hiperparámetros evaluados
+# ==============================================================================
+# Esto hace que el rango de los parametros sea mas 'fino' agregando valores intermedios
+param_grid_fino = {
+    'C': np.logspace(-2, 4, 10),         # [0.01, 0.046, ..., 10000]
+    'gamma': np.logspace(-4, 1, 10),     # [0.0001, ..., 10]
+    'class_weight': ['balanced']
+}
+
+# Búsqueda por grid search con validación cruzada
+# ==============================================================================
+grid_fino = GridSearchCV(
+        estimator  = SVC(kernel='rbf',random_state=22),
+        param_grid = param_grid_fino,
+        scoring    = 'balanced_accuracy',
+        n_jobs     = multiprocessing.cpu_count() - 1,
+        cv         = StratifiedKFold(n_splits=10, shuffle=True, random_state=22), #Mantiene la proporción de clases en cada fold
+        refit      = True,
+        verbose    = 0,
+        return_train_score = True
+       )
+
+grid_fino.fit(X = X_train_scaled, y = y_train)
+""".strip()
+
+
+code_gridSearchFinoV2 = """
+# Grid de hiperparámetros evaluados
+# ==============================================================================
+#Hacemos un "zoom" local alrededor del mejor gamma y c para intentar encontrar una mejora de rendimiento
+param_grid_fino_v2 = {
+    'C': np.linspace(0.5, 2, 10),
+    'gamma': np.linspace(0.01, 0.025, 10),
+    'class_weight': ['balanced']
+}
+
+
+# Búsqueda por grid search con validación cruzada
+# ==============================================================================
+grid_fino_v2 = GridSearchCV(
+        estimator  = SVC(kernel='rbf',random_state=22),
+        param_grid = param_grid_fino_v2,
+        scoring    = 'balanced_accuracy',
+        n_jobs     = multiprocessing.cpu_count() - 1,
+        cv         = StratifiedKFold(n_splits=10, shuffle=True, random_state=22), #Mantiene la proporción de clases en cada fold
+        refit      = True,
+        verbose    = 0,
+        return_train_score = True
+       )
+
+grid_fino_v2.fit(X = X_train_scaled, y = y_train)
+
+""".strip()
+
+
+code_randomizedSearch ="""
+# Grid de hiperparámetros evaluados
+# ==============================================================================
+param_randomS = {
+    'C': uniform(loc=0.1, scale=100),        # valores entre 0.1 y 100.1
+    'gamma': uniform(loc=0.0001, scale=1),   # valores entre 0.0001 y 1.0001
+    'class_weight': ['balanced']
+}
+
+# Búsqueda por grid search con validación cruzada
+# ==============================================================================
+random_search = RandomizedSearchCV(
+    estimator=SVC(kernel='rbf', random_state=22),
+    param_distributions=param_randomS,
+    n_iter=30,  # cantidad de combinaciones a probar
+    scoring='balanced_accuracy',
+    n_jobs=multiprocessing.cpu_count() - 1,
+    cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=22),
+    refit=True,
+    verbose=0,
+    random_state=22,
+    return_train_score=True
+)
+
+random_search.fit(X_train_scaled, y_train)
+""".strip()
