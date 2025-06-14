@@ -1,0 +1,14 @@
+# Ignorar carpetas de caché de Python
+__pycache__/
+*.py[cod]
+
+# Ignorar archivos temporales de entorno virtual
+venv/
+.env/
+
+# Archivos de configuración de Jupyter Notebook
+.ipynb_checkpoints/
+
+# Archivos de log y otros temporales
+*.log
+*.tmp
