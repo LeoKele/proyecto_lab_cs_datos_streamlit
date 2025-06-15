@@ -142,7 +142,7 @@ st.markdown("""
 
 • La proporción de Churners es mayor en clientes sin pareja.
 
-• La proporción de Churners es bastante mayor en clientes sin hijos.           
+• La proporción de Churners es mayor en clientes sin hijos.           
             
             """)
 
@@ -164,15 +164,15 @@ st.markdown("""
             """)
 
 st.subheader("Información Sobre la Cuenta del Cliente - Variables Numéricas")
-st.markdown("Los siguientes boxplots comparan la distribución de tenure (tiempo como cliente), cargos mensuales y cargos totales entre clientes que se dieron de baja y los que permanecieron. Esto nos puede dar una idea de el comportamiento de facturación y permanencia que podrían estar relacionados con la decisión de abandonar el servicio.")
+st.markdown("Los siguientes boxplots comparan la distribución de tenure (antigüedad como cliente), cargos mensuales y cargos totales entre clientes que se dieron de baja y los que permanecieron. Esto nos puede dar una idea de el comportamiento de facturación y permanencia que podrían estar relacionados con la decisión de abandonar el servicio.")
 account_columns_numeric = ['tenure', 'MonthlyCharges', 'TotalCharges']
 boxplot_plots_plotly(df_eda_app, account_columns_numeric, 'Información Sobre la Cuenta del Cliente')
 st.markdown("""
 ### Conclusiones:
 
-• En cuanto a los cargos mensuales, hay mayor acumulación de Churnerns en valores más altos.
+• En clientes que Churnean, hay mayor acumulación de registros con poca antiguedad de contrato.           
 
-• En clientes que Churnean, hay mayor acumulación de registros con poca antiguedad de contrato.
+• En cuanto a los cargos mensuales, hay mayor acumulación de Churnerns en valores más altos.
 
 • Aquellos clientes que Churnean, suelen tener cargos totales más bajos. Esto podría producirse debido a la relación encontrada con `tenure` (menos meses de antiguedad, menos cargos totales).        
             """)
@@ -188,7 +188,7 @@ st.subheader("Análisis de los Resultados: ")
 st.markdown("""
 `TENURE` (Antiguedad en meses):
 
-- Distribución: Ligeramente asimétrica hacia la derecha (curtosis: 0.24)
+- Distribución: Ligeramente asimétrica hacia la derecha (skewness: 0.24)
 
 - Variabilidad: Muy alta (CV: 75.7%) - hay clientes muy nuevos y muy antiguos
 
@@ -198,11 +198,11 @@ st.markdown("""
 
 `MONTHLY CHARGES` (Cargos mensuales):
 
-- Distribución: Ligeramente asimétrica hacia la izquierda (curtosis: -0.22)
+- Distribución: Ligeramente asimétrica hacia la izquierda (skewness: -0.22)
 
 - Variabilidad: Moderada (CV: 46.4%)
 
-- Interpretación: La mediana ($70.35) es mayor que la media ($64.80), sugiere concentración en valores altos
+- Interpretación: La mediana (USD 70.35) es mayor que la media (USD 64.80), sugiere concentración en valores altos
 
 - Rango: De $18.25 a $118.75 - amplio espectro de planes
 
@@ -214,7 +214,7 @@ st.markdown("""
 
 - Variabilidad: Extremadamente alta (CV: 99.3%) - la más variable de las tres
 
-- Interpretación: Media ($2,283) muy superior a la mediana ($1,397) - muchos valores bajos y algunos muy altos
+- Interpretación: Media (USD 2,283) muy superior a la mediana (USD 1,397) - muchos valores bajos y algunos muy altos
           
             
             
@@ -346,7 +346,7 @@ st.markdown("""
 """)
 
 st.markdown("""
-Entonces, los modelos de
+Entonces, los modelos:
 - `SVM_rbf`,
 - `lightGBM`,
 - `Regresión Logística`
@@ -367,7 +367,7 @@ Luego de evaluar distintos modelos, **decidimos seleccionar el `SVM_rbf`** como 
 
 Entre los modelos evaluados:
 
-- La **regresión logística estandarizada** obtuvo el **mayor recall (0.764)** —proporción de churners correctamente identificados—, pero con una **precisión más baja (0.527)** —de todos los casos predichos como churn, cuántos realmente lo son—. Su **F1 Score** —promedio armónico entre precisión y recall— fue de **0.624**.
+- La **`Regresión Logística` estandarizada** obtuvo el **mayor recall (0.764)** —proporción de churners correctamente identificados—, pero con una **precisión más baja (0.527)** —de todos los casos predichos como churn, cuántos realmente lo son—. Su **F1 Score** —promedio armónico entre precisión y recall— fue de **0.624**.
 
 - El modelo **`SVM_rbf` estandarizado** logró un **recall muy similar (0.752)**, pero con una **mejor precisión (0.545)** y un **F1 Score superior (0.632)**. Esto indica que detecta casi los mismos casos de churn que la regresión logística, pero con **menos falsos positivos**, lo cual es clave si las acciones de retención tienen un costo.
 
@@ -390,7 +390,11 @@ st.markdown("""
             """)
 
 st.markdown("""
-[... Explicar lo que se va a hacer con las variables categóricas, por qué es importante manejar la redundancia y cómo se va a realizar el proceso.]
+A la hora de utilizar un modelo basado en SVM, menos es más: un conjunto de variables bien elegidas, no redundantes y bien escaladas, permite encontrar un hiperplano más limpio, más generalizable y más eficiente computacionalmente. Tratar la redundancia mejora tanto el rendimiento como la robustez del modelo.
+            
+Se reconoció que un cliente no puede tener múltiples líneas si no tiene servicio telefónico. Por ello, se creó una nueva variable binaria HasMultipleLines que toma el valor 1 solo si el cliente tiene servicio telefónico y múltiples líneas. Luego se eliminó la variable original MultipleLines, eliminando así la redundancia.
+            
+Se observó que servicios como OnlineSecurity, StreamingTV o TechSupport solo pueden contratarse si el cliente tiene servicio de internet. Para resolver esta dependencia lógica, se crearon variables binarias (HasOnlineSecurity, HasStreamingTV, etc.) que indican si el cliente tiene el servicio y además tiene internet. Las variables originales fueron eliminadas, conservando únicamente la información relevante y no redundante.
             """)
 
 with st.expander("Ver código de manejo de redundancia", expanded=True):
@@ -400,14 +404,14 @@ with st.expander("Ver código de manejo de redundancia", expanded=True):
 
 st.subheader("Transformación de datos")
 st.markdown("""
-[Se aplica el binary encoding a las variables binarias recien modificadas...]
+Aplicamos binary encoding a las variables recién creadas y luego las transformamos de booleano a numérico.
 """)
 with st.expander("Ver código de transformación de datos", expanded=True):
     st.code(code_transformacion_1, language='python')
     st.code(code_transformacion_2, language='python')
     st.code(code_transformacion_3, language='python')
 
-st.markdown("Comentario sobre la transformacion:")
+st.markdown("")
 
 #? ===========
 
@@ -438,12 +442,12 @@ st.markdown("Finalmente, tenemos nuestro dataset listo para ser utilizado por el
 
 
 #! ==============================================================
-st.markdown("---")
+st.markdown("Se aplicó un proceso de escalado o estandarización sobre las variables numéricas `tenure`, `MonthlyCharges` y `TotalCharges`, utilizando la técnica de StandardScaler. Esta transformación consiste en restar la media y dividir por la desviación estándar de cada variable, lo que da como resultado nuevas variables con media 0 y desviación estándar 1.")
 #! ==============================================================
 
 
 st.header("🧠 Entrenamiento del modelo")
-st.markdown("Ya estamos en condiciones de optimizar el modelo elegido con el propósito de mejorar aún más esas mérticas iniciales obtenidas.")
+st.markdown("Ya estamos en condiciones de optimizar el modelo elegido con el propósito de mejorar aún más esas métricas iniciales obtenidas.")
 
 st.markdown("Hacemos una función donde vamos a guardar los mejores hiperparámetros de cada entrenamiento para luego comparar todo junto.")
 with st.expander("Ver código función para el DataFrame de resultados", expanded=True):
@@ -488,7 +492,7 @@ with st.expander("Ver código función para el RandomizedSearchCV()", expanded=T
     st.code("df_resultados_optimizacion = agregar_resultado_busqueda(df_resultados_optimizacion,random_search,'Random Search')",language='python')
 
 st.subheader("Comparación de las métricas obtenidas en cada entrenamiento")
-st.markdown("[yo pondria algo aca]")
+st.markdown("En la siguiente tabla se resumen los resultados de distintas estrategias de búsqueda de hiperparámetros aplicadas al modelo SVM, evaluadas mediante la métrica de Balanced Accuracy, que resulta adecuada dado el desbalance de clases presente en el dataset:")
 
 #Cargar resultados de modelos optimizados
 @st.cache_data
@@ -503,7 +507,11 @@ df_optimizacion = cargar_resultados_optimizacion()
 st.dataframe(df_optimizacion)
 comparacion_modelos_optimizados(df_optimizacion)
 
-st.markdown("[Habria que terminar de cerrar la idea de que el modelo seleccionado fue el creado con la busqueda mas fina de hiperparametros]")
+st.markdown("""Como se puede observar, el mejor rendimiento se obtuvo con la versión ajustada del Grid Search fino (V2), alcanzando una balanced accuracy del 76.56%. Esto demuestra que realizar una búsqueda más específica en torno a los valores óptimos mejora el desempeño del modelo.
+
+También se observa que Random Search presentó un rendimiento inferior al de las variantes de Grid Search, lo cual refuerza la idea de que una exploración sistemática del espacio de hiperparámetros, aunque más costosa, puede generar mejores resultados.
+
+En todos los casos se mantuvo el `class_weight='balanced'`, lo que permitió compensar la desproporción entre clases durante el entrenamiento.""")
 
 df_final_app = data.copy()
 modelo_comparacion = cargar_modelo_optimizado()

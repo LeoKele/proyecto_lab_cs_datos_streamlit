@@ -431,7 +431,7 @@ def generar_scatterplots_optimizado(df, max_points=5000):
             y=y_trend,
             mode='lines',
             name='Tendencia',
-            line=dict(color=PALETA[1], width=2),
+            line=dict(color=PALETA[5], width=2),
             hoverinfo='skip'
         ), 
         row=1, col=1
@@ -466,7 +466,7 @@ def generar_scatterplots_optimizado(df, max_points=5000):
             y=y_trend2,
             mode='lines',
             name='Tendencia',
-            line=dict(color=PALETA[1], width=2),
+            line=dict(color=PALETA[5], width=2),
             hoverinfo='skip'
         ), 
         row=1, col=2

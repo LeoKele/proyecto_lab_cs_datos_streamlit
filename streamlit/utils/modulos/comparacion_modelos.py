@@ -90,8 +90,8 @@ def mostrar_comparacion_nuevas_variables():
 
     st.markdown("""
     Durante el análisis, evaluamos la creación de dos nuevas variables:
-    - **CantidadServicios**: suma de todos los servicios contratados por el cliente (PhoneService, MultipleLines, Internet y servicios asociados).
-    - **MonthlyChargeRate**: relación entre el TotalCharges y el tenure (TotalCharges / tenure).
+    - **CantidadServicios**: Suma de todos los servicios contratados por el cliente (PhoneService, MultipleLines, Internet y servicios asociados).
+    - **MonthlyChargeRate**: Relación entre el TotalCharges y el tenure (TotalCharges / tenure).
 
     Entrenamos el modelo `SVM_rbf` optimizado (GridSearch) tanto **sin** como **con** estas nuevas variables. Sin embargo, al comparar las métricas, observamos que **no mejoraban el desempeño** (incluso, en algunos casos, empeoraban levemente).  
     Por eso, decidimos **no incluirlas en el dataset final** presentado.
