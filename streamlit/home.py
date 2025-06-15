@@ -500,7 +500,7 @@ def cargar_resultados_optimizacion():
         return pickle.load(f)
 
 df_optimizacion = cargar_resultados_optimizacion()
-st.dataframe(df_resultados_std)
+st.dataframe(df_optimizacion)
 comparacion_modelos_optimizados(df_optimizacion)
 
 st.markdown("[Habria que terminar de cerrar la idea de que el modelo seleccionado fue el creado con la busqueda mas fina de hiperparametros]")
