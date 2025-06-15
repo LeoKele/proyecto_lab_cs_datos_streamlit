@@ -17,6 +17,12 @@ import seaborn as sns
 
 # Análisis Estadísticos
 from scipy import stats
+from scipy.stats import pearsonr, spearmanr, kendalltau
+from scipy.stats import uniform
+from sklearn.feature_selection import mutual_info_regression
+import warnings
+warnings.filterwarnings('ignore')
+import math
 
 # PreProcesado y modelado
 # ==============================================================================
@@ -29,8 +35,10 @@ from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassif
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
-
-from sklearn.metrics import balanced_accuracy_score, f1_score, recall_score, precision_score, roc_auc_score, average_precision_score
+from sklearn.model_selection import StratifiedKFold, RepeatedKFold, GridSearchCV, RandomizedSearchCV
+import multiprocessing
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import balanced_accuracy_score, f1_score, recall_score, precision_score, roc_auc_score, average_precision_score, make_scorer, ConfusionMatrixDisplay, confusion_matrix
 """.strip()
 
 

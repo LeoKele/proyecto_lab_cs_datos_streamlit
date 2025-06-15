@@ -83,7 +83,8 @@ df_mod_app['TotalCharges'] = pd.to_numeric(df_mod_app['TotalCharges'], errors='c
 
 with st.expander("Ver código de limpieza", expanded=True):
     st.code(code_limpieza, language='python')
-    st.code(f"Cantidad de filas con valor nulo en 'Total Charges': {df_mod_app['TotalCharges'].isnull().sum()}")
+    st.markdown("**Salida:**")
+    st.write(f"Cantidad de filas con valor nulo en 'Total Charges': {df_mod_app['TotalCharges'].isnull().sum()}")
 
 
 st.markdown("Como podemos observar, existen 11 filas con valor nulo en esta variable de un total de 7043 registros (aproximadamente 0.16% del dataset). Dado que este porcentaje es mínimo y no representa una pérdida significativa de información, decidimos eliminar directamente estas filas para mantener la integridad del análisis.")
@@ -93,7 +94,9 @@ st.markdown("Como podemos observar, existen 11 filas con valor nulo en esta vari
 with st.expander("Ver código de imputación", expanded=True):
     st.code(code_limpieza2, language='python')
     df_mod_app = df_mod_app.dropna(subset=['TotalCharges'])
-    st.code(f"Cantidad de filas después de eliminar nulos: {len(df_mod_app)}\n"
+    st.markdown("**Salida:**")
+
+    st.write(f"Cantidad de filas después de eliminar nulos: {len(df_mod_app)}\n"
             f"Cantidad de filas eliminadas: {len(data) - len(df_mod_app)}")
 
 
@@ -101,8 +104,7 @@ st.markdown("Ahora, la variable TotalCharges ya se encuentra en el tipo de dato 
 
 
 #? ==============================================================
-st.subheader("Limpieza de datos")
-st.markdown("Para una correcta visualización de los datos tenemos que editar las etiquetas de la variable PaymentMethod.")
+st.markdown("Luego, para una correcta visualización de los datos tenemos que editar las etiquetas de la variable PaymentMethod.")
 with st.expander("Ver código de limpieza de etiquetas", expanded=True):
     st.code(code_limpieza3, language='python')
     st.markdown("**Salida:**")
@@ -204,7 +206,7 @@ st.markdown("""
 
 - Interpretación: La mediana (USD 70.35) es mayor que la media (USD 64.80), sugiere concentración en valores altos
 
-- Rango: De $18.25 a $118.75 - amplio espectro de planes
+- Rango: De 18.25 a 118.75 dolares - amplio espectro de planes
 
 
 
@@ -404,7 +406,7 @@ with st.expander("Ver código de manejo de redundancia", expanded=True):
 
 st.subheader("Transformación de datos")
 st.markdown("""
-Aplicamos binary encoding a las variables recién creadas y luego las transformamos de booleano a numérico.
+Aplicamos binary encoding a las variables recién creadas, las transformamos de booleano a numérico, y utilizamos dummy encoding para el resto de variables categóricas
 """)
 with st.expander("Ver código de transformación de datos", expanded=True):
     st.code(code_transformacion_1, language='python')
@@ -434,7 +436,6 @@ with st.expander("Ver código de división de datos", expanded=True):
     st.code(code_split, language='python')
 
 st.subheader("Estandarización de datos")
-st.markdown("...")
 with st.expander("Ver código de estandarización", expanded=True):
     st.code(code_estandarizacion, language='python')
 
@@ -444,7 +445,7 @@ st.markdown("Finalmente, tenemos nuestro dataset listo para ser utilizado por el
 #! ==============================================================
 st.markdown("Se aplicó un proceso de escalado o estandarización sobre las variables numéricas `tenure`, `MonthlyCharges` y `TotalCharges`, utilizando la técnica de StandardScaler. Esta transformación consiste en restar la media y dividir por la desviación estándar de cada variable, lo que da como resultado nuevas variables con media 0 y desviación estándar 1.")
 #! ==============================================================
-
+st.markdown("---")
 
 st.header("🧠 Entrenamiento del modelo")
 st.markdown("Ya estamos en condiciones de optimizar el modelo elegido con el propósito de mejorar aún más esas métricas iniciales obtenidas.")
@@ -474,7 +475,7 @@ with st.expander("Ver código función para el GridSearchCV Fino", expanded=True
 
 st.subheader("GridSearchCV() - Hiperparámetros Fino V2")
 st.markdown("""
-A partir de los mejores valores encontrados en la búsqueda anterior, se realiza un ajuste más localizado, centrado en un rango reducido alrededor del mejor `C` y `gamma`. Este enfoque permite afinar aún más el modelo, evaluando con mayor precisión pequeñas variaciones que podrían mejorar ligeramente el rendimiento. Básicamente, hacemos un "zoom" entorno al mejor valor encontrado por el entrenamiento anterior.
+A partir de los mejores valores encontrados en la búsqueda anterior, se realiza un ajuste más localizado, centrado en un rango reducido alrededor del mejor `C` y `gamma`. Este enfoque permite afinar aún más el modelo, evaluando con mayor precisión pequeñas variaciones que podrían mejorar ligeramente el rendimiento. Básicamente, hacemos un "zoom" entorno al mejor valor encontrado por el entrenamiento anterior, un `C` alrededor de 1 y un `gamma` alrededor de 0.0167
 """)
 with st.expander("Ver código función para el GridSearchCV Fino", expanded=True):
     st.code(code_gridSearchFinoV2,language='python')
