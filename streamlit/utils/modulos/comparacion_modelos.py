@@ -82,7 +82,7 @@ def comparar_metricas_modelos_especificos(df_todos, modelos_comparar=None):
 
 def mostrar_comparacion_nuevas_variables():
     """
-    Muestra en Streamlit la comparación de métricas del modelo SVM-RBF GridSearch
+    Muestra en Streamlit la comparación de Balanced Accuracy del modelo SVM-RBF GridSearch
     entrenado sin y con las nuevas variables (CantidadServicios y MonthlyChargeRate).
     Incluye explicación, tabla y gráfico interactivo.
     """
@@ -93,47 +93,45 @@ def mostrar_comparacion_nuevas_variables():
     - **CantidadServicios**: Suma de todos los servicios contratados por el cliente (PhoneService, MultipleLines, Internet y servicios asociados).
     - **MonthlyChargeRate**: Relación entre el TotalCharges y el tenure (TotalCharges / tenure).
 
-    Entrenamos el modelo `SVM_rbf` optimizado (GridSearch) tanto **sin** como **con** estas nuevas variables. Sin embargo, al comparar las métricas, observamos que **no mejoraban el desempeño** (incluso, en algunos casos, empeoraban levemente).  
+    Entrenamos el modelo `SVM_rbf` optimizado (GridSearch) tanto **sin** como **con** estas nuevas variables. Sin embargo, al comparar el Balanced Accuracy, observamos que **no mejoraban el desempeño** (incluso, en algunos casos, empeoraban levemente).  
     Por eso, decidimos **no incluirlas en el dataset final** presentado.
 
-    Las métricas obtenidas fueron:
     """)
 
+    # Valores de Balanced Accuracy
+    metodos = ['Sin nuevas variables', 'Con nuevas variables']
+    scores = [0.7624, 0.7524]
 
-    ruta_base = os.path.dirname(__file__)
-    ruta_pickle = os.path.join(ruta_base, "..","modelos_entrenados", "comparacion_metricas_svm_gridsearch.pkl")
-    df_comp = pd.read_pickle(ruta_pickle)
-
-    st.dataframe(df_comp)
+    # Mostrar tabla
+    df_comp = pd.DataFrame({
+        'Método': metodos,
+        'Balanced Accuracy': scores
+    })
 
     st.markdown("Visualización comparativa:")
 
-    # Usando Plotly Express para gráfico de barras agrupadas
-    df_plot = df_comp.T.reset_index().rename(columns={'index': 'Métrica'})
-    df_plot = df_plot.melt(id_vars='Métrica', var_name='Modelo', value_name='Valor')
-
-    fig = px.bar(
-        df_plot,
-        x='Métrica',
-        y='Valor',
-        color='Modelo',
-        barmode='group',
-        title='Comparación de métricas: SVM-RBF GridSearch<br>Sin nuevas variables vs Con nuevas variables',
-        template='plotly_white',
-        height=400,
-        color_discrete_sequence=PALETA
+    # Gráfico de barras
+    fig = go.Figure(
+        go.Bar(
+            x=metodos,
+            y=scores,
+            text=[f"{s:.4f}" for s in scores],
+            textposition='auto',
+            marker_color=PALETA
+        )
     )
 
     fig.update_layout(
-        yaxis_title='Valor',
-        xaxis_title='Métrica',
-        legend_title='Modelo'
+        title='Comparación de Balanced Accuracy: SVM-RBF GridSearch<br>Sin nuevas variables vs Con nuevas variables',
+        xaxis_title='Método',
+        yaxis_title='Balanced Accuracy',
+        yaxis=dict(range=[0.74, 0.77]),
+        template='plotly_white'
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
     st.info("Como se observa, agregar las nuevas variables no aportó mejoras al modelo, por lo que optamos por la versión más simple y robusta.")
-
 
 
 def mostrar_comparacion_optuna_vs_gridsearch(modelo_grid,df):
