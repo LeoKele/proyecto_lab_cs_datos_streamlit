@@ -524,9 +524,11 @@ st.subheader("Predicción y evaluación del modelo")
 modelo_final = cargar_modelo_optimizado().best_estimator_
 
 mostrar_matriz_confusion(df_final_app, modelo_final)
-
+st.markdown("### Conclusión sobre el modelo final")
+st.markdown(texto_conclusion_modelo_final)
 
 st.subheader("Importancia de predictores")
+
 
 #Cargar resultados de la importancia de predictores
 @st.cache_data
@@ -543,6 +545,8 @@ st.dataframe(df_importancia)
 
 graficar_importancia_plotly(df_importancia)
 
+st.markdown("### Variables más importantes")
+st.markdown(texto_variables_mas_importantes)
 
 #! ==============================================================
 st.markdown("---")

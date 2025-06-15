@@ -1,6 +1,6 @@
 import plotly.express as px
 import plotly.graph_objects as go
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score,recall_score, precision_score, average_precision_score
 import plotly.figure_factory as ff
 from sklearn.inspection import permutation_importance
 import multiprocessing
@@ -51,7 +51,7 @@ def obtener_metricas_y_predicciones(df, modelo):
 
     # Métricas
     mat_confusion = confusion_matrix(y_test, predicciones)
-    accuracy = accuracy_score(y_test, predicciones)
+    accuracy = balanced_accuracy_score(y_test, predicciones)
 
     return mat_confusion, accuracy, y_test, predicciones
 
@@ -70,7 +70,7 @@ def mostrar_matriz_confusion_plotly(matriz, accuracy):
     )
 
     fig.update_layout(
-        title_text=f"<b>Matriz de Confusión</b><br>Accuracy: {accuracy:.2%}",
+        title_text=f"<b>Matriz de Confusión</b>",
         xaxis_title="Predicción",
         yaxis_title="Valor Real"
     )
@@ -82,9 +82,31 @@ def mostrar_matriz_confusion(df, modelo):
     mat_conf, acc, y_test, y_pred = obtener_metricas_y_predicciones(df, modelo)
 
     st.write("### Matriz de Confusión")
-    st.write(f"Accuracy en test: **{acc:.2%}**")
+    st.write(f"Balanced Accuracy en test: **{acc:.2%}**")
     
     mostrar_matriz_confusion_plotly(mat_conf, acc)
+        # Calcular métricas adicionales
+    f1 = f1_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    try:
+        y_proba = modelo.predict_proba(df_final_dividido(df)[1])[:, 1]
+    except AttributeError:
+        y_proba = None
+    pr_auc = average_precision_score(y_test, y_proba) if y_proba is not None else None
+
+    # Crear DataFrame de métricas
+    metricas = {
+        "Balanced Accuracy": [acc],
+        "F1 Score": [f1],
+        "Recall": [recall],
+        "Precision": [precision],
+        "PR AUC": [pr_auc]
+    }
+    df_metricas = pd.DataFrame(metricas)
+
+    st.write("### Métricas del modelo final en test")
+    st.dataframe(df_metricas)
 
 def graficar_importancia_plotly(df_importancia):
     # Ordenar ascendente para que la barra horizontal quede similar
