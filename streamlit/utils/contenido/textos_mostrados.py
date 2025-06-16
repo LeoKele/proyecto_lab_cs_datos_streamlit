@@ -45,3 +45,22 @@ texto_variables_mas_importantes = """
 5. `PaymentMethod_Electronic check`: Tal como se observó en el EDA, los clientes que utilizan el pago mediante cheque electrónico presentan una mayor tasa de abandono. Esto podría deberse a que este método de pago está asociado a clientes menos digitalizados o con menor fidelización, lo cual el modelo logró capturar como un patrón relevante en comparación con otras variables.
 
 """.strip()
+
+
+
+texto_conclusion_final =  """
+Este análisis se basó en un conjunto de datos sobre el abandono de clientes de una empresa de telecomunicaciones, con el objetivo de identificar los factores clave que influyen en la decisión de cancelar el servicio. A partir de una limpieza sencilla y una transformación cuidadosa de los datos —incluyendo la conversión de variables categóricas, el escalado de variables numéricas y el tratamiento de redundancias, como la existente entre las columnas PhoneService y MultipleLines— se preparó la base para entrenar un modelo robusto.
+
+Se evaluaron varios modelos base, destacándose SVM con kernel RBF, LightGBM y regresión logística. Aunque LightGBM mostró una precisión ligeramente superior, priorizando la identificación de clientes con alto riesgo de abandono, se optó por SVM_RBF. Si bien generó una cantidad considerable de falsos positivos en la matriz de confusión, esto se alineaba con el objetivo de maximizar el recall, a fin de no perder oportunidades de retención.
+
+Desde el punto de vista predictivo, el modelo final basado en Support Vector Machines (SVM) con kernel RBF fue seleccionado no solo por su desempeño general (balanced accuracy del 75 %), sino también por su capacidad de identificar correctamente a clientes en riesgo de abandonar el servicio (recall de 0,78 para la clase churn).
+
+A través del análisis exploratorio de datos, se observó que factores como tener contratos mensuales, no contar con servicios de seguridad en línea, utilizar internet de fibra óptica y tener una antigüedad menor (tenure) estaban fuertemente asociados con una mayor tasa de abandono. Aunque las variables demográficas mostraron algunas diferencias en las tasas de churn durante el EDA, su impacto predictivo individual resultó ser menos dominante en el modelo final, en comparación con las características del servicio contratado y la antigüedad.
+
+La elección del modelo final respondió a una decisión estratégica: priorizar la detección de abandonos por sobre la precisión absoluta, ya que intervenir de manera preventiva sobre un cliente que no tenía intención de irse tiene un costo menor que perder a uno que sí lo haría.
+
+En conclusión, este análisis utilizó un conjunto de datos sobre la tasa de abandono en una empresa de telecomunicaciones para revelar factores críticos que influyen en la pérdida de clientes, como las cuotas mensuales, la duración del contrato y los tipos de servicios contratados. Mediante la implementación de acciones de marketing dirigido y la mejora en la oferta de servicios, la empresa puede mitigar los riesgos de pérdida de clientes y fomentar la fidelización a largo plazo. El modelo SVM_RBF, con una precisión del 75 %, proporciona una herramienta confiable para predecir posibles abandonos y orientar estrategias proactivas de interacción con los clientes.
+
+
+
+""".strip()
