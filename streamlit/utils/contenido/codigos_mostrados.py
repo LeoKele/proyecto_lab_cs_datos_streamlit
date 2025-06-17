@@ -89,7 +89,6 @@ def evaluar_modelos(X_train, y_train, X_test, y_test):
     for nombre, modelo in modelos.items():
         modelo.fit(X_train, y_train)
         y_pred = modelo.predict(X_test)
-        # Asegurarse de que el modelo tiene el atributo predict_proba antes de usarlo
         if hasattr(modelo, "predict_proba"):
             y_proba = modelo.predict_proba(X_test)[:, 1]
         elif hasattr(modelo, "decision_function"):
@@ -106,7 +105,7 @@ def evaluar_modelos(X_train, y_train, X_test, y_test):
             'Precision': precision_score(y_test, y_pred),
             # 'ROC AUC': roc_auc_score(y_test, y_proba) if y_proba is not None else None
             #PR AUC
-            'PR AUC': average_precision_score(y_test,y_proba) if y_proba is not None else None #es más informativa cuando te interesa detectar bien la clase 1.
+            'PR AUC': average_precision_score(y_test,y_proba) if y_proba is not None else None
         })
 
     return pd.DataFrame(resultados).sort_values(by='Balanced Accuracy', ascending=False).reset_index(drop=True)
@@ -121,7 +120,7 @@ df_inicial.drop(columns='customerID', inplace=True)
 # Realizamos modificaciones rapidas porque nuestros modelos necesitan variables numericas
 binary_cols_quick = ['gender', 'Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']
 
-# Variables categóricas con más de dos opciones (ajusta la lista si es necesario)
+# Variables categóricas con más de dos opciones
 categorical_cols_quick = ['MultipleLines', 'InternetService', 'OnlineSecurity', 'OnlineBackup',
                           'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies',
                           'Contract', 'PaymentMethod']
@@ -130,7 +129,6 @@ categorical_cols_quick = ['MultipleLines', 'InternetService', 'OnlineSecurity', 
 for col in binary_cols_quick:
     if col in df_inicial.columns:
         if df_inicial[col].dtype == 'object': # Solo codificar si son strings
-             # Manejar el caso de 'No internet service' o 'No phone service' si aplica
             df_inicial[col] = df_inicial[col].replace({'Yes': 1, 'No': 0, 'Male': 1, 'Female': 0})
 
 
@@ -195,7 +193,6 @@ def evaluar_modelos_estandarizados(X_train, y_train, X_test, y_test):
     for nombre, modelo in modelos.items():
         modelo.fit(X_train, y_train)
         y_pred = modelo.predict(X_test)
-        # Asegurarse de que el modelo tiene el atributo predict_proba antes de usarlo
         if hasattr(modelo, "predict_proba"):
             y_proba = modelo.predict_proba(X_test)[:, 1]
         elif hasattr(modelo, "decision_function"):
@@ -212,7 +209,7 @@ def evaluar_modelos_estandarizados(X_train, y_train, X_test, y_test):
             'Precision': precision_score(y_test, y_pred),
             # 'ROC AUC': roc_auc_score(y_test, y_proba) if y_proba is not None else None
             #PR AUC
-            'PR AUC': average_precision_score(y_test,y_proba) if y_proba is not None else None #es más informativa cuando te interesa detectar bien la clase 1.
+            'PR AUC': average_precision_score(y_test,y_proba) if y_proba is not None else None
         })
 
     return pd.DataFrame(resultados).sort_values(by='Balanced Accuracy', ascending=False).reset_index(drop=True)
